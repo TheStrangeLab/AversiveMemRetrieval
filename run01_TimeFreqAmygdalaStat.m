@@ -1,13 +1,15 @@
+% This script reproduce the amygdala time frequency results and statistic
+% reported at Figure 1 and Supplementary Figure 2;
 
 clear all
 close all
 clc
 
 restoredefaultpath
-addpath '/Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox/fieldtrip-20210212/'
+addpath '~/fieldtrip-20210212/'
 ft_defaults
 
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
+cd ~/data2github/
 load 'Ga_Amygdala_Timefreq.mat'
 
 %% compute the diff for the interaction
@@ -19,7 +21,7 @@ GTFs_diff_eKMissnKMiss.powspctrm = Ga_eKMiss.powspctrm - Ga_nKMiss.powspctrm
 
 %%
 cfg=[];
-cfg.method = 'montecarlo'%; %'analytic
+cfg.method = 'montecarlo'
 cfg.statistic = 'depsamplesT';
 cfg.correctm = 'cluster';
 
@@ -52,19 +54,15 @@ Emo = ft_freqstatistics(cfg,Ga_Unpl, Ga_Neu);
 ns=size(Ga_KMiss.powspctrm,1)
 cfg.design = [ones(1,ns) ones(1,ns).*2;[1:ns] [1:ns]];
 HitKMiss = ft_freqstatistics(cfg,Ga_Hit, Ga_KMiss);
-%%
-%cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
-%save ('statTFAmygdala.mat','Emo','Int_hitKmiss','HitKMiss')
-%%
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
+%% plot data for Fig. 1
 load statTFAmygdala.mat
-%% plot data for Fig 1
+%% plot data for conditions
 cfg = []; 
 cfg.figure = 'gcf'
-cfg.xlim = [-.5 1.5];%
-cfg.ylim = [35 150];%'maxmin';
-cfg.zlim = [-0.3 0.3];%[0 0.2];%'maxmin';
-h = figure;%set(h,'position', [0 0 400 188])
+cfg.xlim = [-.5 1.5];
+cfg.ylim = [35 150];
+cfg.zlim = [-0.3 0.3];
+h = figure;
 subplot(2,2,1); ft_singleplotTFR(cfg,Ga_eHit); 
 tit=title('eRHit');set(findobj(tit,'type','text'),'FontSize',36);
 hold on
@@ -78,7 +76,7 @@ subplot(2,2,4); ft_singleplotTFR(cfg,Ga_nKMiss);
 tit=title('nKHit&Miss');set(findobj(tit,'type','text'),'FontSize',36);
 hold on
 
-%% plot unpleasant vs neutral stat for Fig 1 
+%% define the cluster 
 
 h=figure;set(h, 'Position', get(0, 'Screensize'))
 cfg.zlim = [-4 4];
@@ -88,8 +86,8 @@ M.powspctrm = Emo.stat.*Emo.mask;
 M.dimord = 'chan_freq_time';
 ft_singleplotTFR(cfg,M); colorbar;  tit=title('emo'); xlabel('time in s'); ylabel('frequency in Hz');
 set(findobj(tit,'type','text'),'FontSize',16); 
-%%
-h = figure;%set(h,'position', [0 0 250 188]) %this is in pixel
+%% statistic plot in Fig. 1 d
+h = figure;
 logRelative1 = Emo
 logRelative1.mask = Emo.mask;
 logRelative1.powspctrm = Emo.stat
@@ -98,7 +96,7 @@ cfg.maskstyle = 'outline';
 cfg.maskalpha = 1;
 ft_singleplotTFR(cfg,logRelative1);colorbar;  tit=title('emotional effect'); xlabel('time (sec)'); ylabel('frequency (Hz)');
 
-%%
+%% mean gamma values within the significant cluster
 maskt= sum(squeeze(Emo.mask),1);
 tvec = Emo.time(maskt>0);
 toi=[min(tvec) max(tvec)]
@@ -120,10 +118,10 @@ clear mat
 
 mat(:,1) = squeeze(mean(mean(Ga_Unpl.powspctrm(:,:,pf1:pf2,pt1:pt2),4),3));
 mat(:,2) = squeeze(mean(mean(Ga_Neu.powspctrm(:,:,pf1:pf2,pt1:pt2),4),3));
-%%
-addpath /Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox_plot/beeswarm-master
-addpath /Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox_plot/stdshade.m
-h = figure;set(h,'position', [0 0 250 188]) %this is in pixel
+%% plot single subjects data as in Fig. 1d
+addpath ~/utils/beeswarm-master
+addpath ~/utils/stdshade.m
+h = figure;set(h,'position', [0 0 250 188]) 
 nsj=size(mat,1)
 x = [ones(nsj,1) ones(nsj,1)*2];
 y = [mat(:,1) mat(:,2)];
@@ -132,13 +130,13 @@ ylim([-0.4 0.4]);
 xticklabels({[],'Aversive',[],'Neutral'})
 ylabel('mean gamma power')
 
-%% Supplementary Figure 2
+%% Supplementary Fig. 2a
 cfg = []; 
 cfg.figure = 'gcf'
 cfg.xlim = [-.5 1.5];
 cfg.ylim = [0 34];
 cfg.zlim = [-1 1];
-h = figure;%set(h,'position', [0 0 400 188])
+h = figure;
 subplot(2,2,1); ft_singleplotTFR(cfg,Ga_eHit); 
 tit=title('eRHit');set(findobj(tit,'type','text'),'FontSize',36);
 hold on
@@ -153,7 +151,7 @@ tit=title('nKHit&Miss');set(findobj(tit,'type','text'),'FontSize',36);
 hold on
 %%
 cfg=[];
-cfg.method = 'montecarlo'%; %'analytic
+cfg.method = 'montecarlo'
 cfg.statistic = 'depsamplesT';
 cfg.correctm = 'cluster';
 
@@ -186,13 +184,9 @@ Emolow = ft_freqstatistics(cfg,Ga_Unpl, Ga_Neu);
 ns=size(Ga_KMiss.powspctrm,1)
 cfg.design = [ones(1,ns) ones(1,ns).*2;[1:ns] [1:ns]];
 HitKMisslow = ft_freqstatistics(cfg,Ga_Hit, Ga_KMiss);
-%%
-% cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
-% save('statTFAmygdalaLF.mat','Int_hitKmisslow','Emolow','HitKMisslow')
-
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
+%% plot Supplementary Fig. 2b
 load statTFAmygdalaLF.mat
-%% Supplementary Fig. 2
+%% define the cluster
 h=figure;set(h, 'Position', get(0, 'Screensize'))
 cfg.zlim = [-4 4];
 M = Int_hitKmisslow;
@@ -201,18 +195,18 @@ M.dimord = 'chan_freq_time';
 ft_singleplotTFR(cfg,M); colorbar;  tit=title('int en hit Kmiss'); xlabel('time in s'); ylabel('frequency in Hz');
 set(findobj(tit,'type','text'),'FontSize',16);
 
-%%
+%% plot statistic
 h=figure;set(h, 'Position', get(0, 'Screensize'))
 
 logRelative1 = Int_hitKmisslow
 logRelative1.mask = Int_hitKmisslow.mask;
-logRelative1.powspctrm = Int_hitKmisslow.stat% You shoud add a field mask with the mask from the statistics
+logRelative1.powspctrm = Int_hitKmisslow.stat
 cfg.maskparameter = 'mask';
 cfg.maskstyle = 'outline';
 cfg.maskalpha = 1;
 ft_singleplotTFR(cfg,logRelative1);
 
-%%
+%% plot single subjects data as in Supplementary Fig. 2b
 clear mat
 maskt= sum(squeeze(Int_hitKmisslow.mask),1);
 tvec = Int_hitKmisslow.time(maskt>0);
@@ -236,8 +230,8 @@ mat(:,2) = squeeze(mean(mean(Ga_eKMiss.powspctrm(:,:,pf1:pf2,pt1:pt2),4),3));
 mat(:,3) = squeeze(mean(mean(Ga_nHit.powspctrm(:,:,pf1:pf2,pt1:pt2),4),3));
 mat(:,4) = squeeze(mean(mean(Ga_nKMiss.powspctrm(:,:,pf1:pf2,pt1:pt2),4),3));
 
-addpath /Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox_plot/beeswarm-master
-addpath /Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox_plot/stdshade.m
+addpath ~/utils/beeswarm-master
+addpath ~/utils/stdshade.m
 
 h = figure;set(h,'position', [0 0 250 188])
 ns=size(mat,1)
