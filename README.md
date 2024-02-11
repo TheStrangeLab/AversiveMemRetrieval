@@ -2,15 +2,15 @@
 
 This folder contains the code used to analyze the data included in the paper
 
-run01_TimeFreqAmygdala reproduces the time frequency results and statistics for patients with electrodes implanted in the amygdala. It also produces Fig. 1d and Supplementary Fig.2.
+run01_TimeFreqAmygdalaStat reproduces the time frequency results and statistics for patients with electrodes implanted in the amygdala. It also produces Fig. 1d and Supplementary Fig.2.
 
-run01_TimeFreqHippo reproduces the time frequency results and statistics for patients with electrodes implanted in the amygdala. It also produces Fig. 1c and Supplementary Fig.1.
+run01_TimeFreqHippocampusStat reproduces the time frequency results and statistics for patients with electrodes implanted in the amygdala. It also produces Fig. 1c and Supplementary Fig.1.
 
 run02_GrangerCausalityStat reproduces the time frequency Granger results in the direction amygdala to hippocampus and hippocampus to amygdala as in Fig.2
 
 run03_GlobalERSAmygdala reproduces the encoding-retrieval similarity (ERS) analysis in the amygdala as presented in Fig.3c
 
-run03_GlobalERSAmygdala reproduces the encoding-retrieval similarity (ERS) analysis in the hippocampus as presented in Fig.3b
+run03_GlobalERSHippocampus reproduces the encoding-retrieval similarity (ERS) analysis in the hippocampus as presented in Fig.3b
 
 run04_EESERS_amyamy reproduces the encoding retrieval similarity (ERS) analysis in the amygdala, with peaks found in the amygdala at encoding. This code reproduces Supplementary Fig.3
 
