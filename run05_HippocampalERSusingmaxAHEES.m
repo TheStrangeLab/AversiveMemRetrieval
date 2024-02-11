@@ -1,27 +1,22 @@
 clear all
 close all
 clc
-addpath('/Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/01_Paper/Githubcodes/Function')
 
-%%
 restoredefaultpath
-addpath '/Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox/fieldtrip-20210212/'
+addpath '~/fieldtrip-20210212/'
 ft_defaults
 
-oripath = '/Volumes/ManuelaCTB/manuela/Desktop/AversiveMemRetrieval'; 
-addpath(fullfile(oripath,'utils'))
-addpath(fullfile(oripath,'utils','beeswarm-master'))
-addpath('/Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Function')
-
+addpath('~/utils/reinstatement-analysis-master/additional_functions')
+addpath('~/utils/functions')
+addpath('~/utils/beeswarm-master')
+addpath('~/utils')
 %%
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
+cd ~/data2github
 load TF_data_16sj.mat
 load('data_16sj.mat')
-%%
+
 subjects = [60 13 15 16 160 25 32 10 33 6 600 10 2 36 38 8];
 %%
-%[4:8,10,11,13,14] A1; [1:3,9,12,15,16] A2
-% [1,3,6:13,16] h1;[2,4,5,14:15] h2
 Amylist=[2 2 2 1 1 1 1 1 2 1 1 2 1 1 2 2];
 Hclist=[1 2 1 2 2 1 1 1 1 1 1 1 1 2 2 1];
 freq = [23:47]
@@ -35,20 +30,16 @@ parfor s=1:16;
 end
 
 %%
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
 load Gatemp.mat
 
-        subjects = [60 13 15 16 160 25 32 10 33 6 600 10 2 36 38 8];
 subjects_renamed = [60 13 15 16 160 25 32 11 33 6 600 10 2000 36 38 8];
 method = 'oneel'
-if strcmp(method,'allel')
-pos=find(ismember(subjects_renamed,subjects_ers))
-else
-subjects_ers1 = [60 13 15 160 25 32 33 600 2000 36 38 8];
-subjects_ers1me = [60 13 15 160 25 32 11 33 600 10 2000 36 38 8]; %11 cannot be included in the int for nr
-pos = find(ismember(subjects_renamed,subjects_ers1))
-posme = find(ismember(subjects_renamed,subjects_ers1me))
-end
+
+subjects_ers = [60 13 15 160 25 32 33 600 2000 36 38 8];
+subjects_ersme = [60 13 15 160 25 32 11 33 600 10 2000 36 38 8]; %11 cannot be included in the int for nr
+pos = find(ismember(subjects_renamed,subjects_ers))
+posme = find(ismember(subjects_renamed,subjects_ersme))
+
 %%
 nsmp    = size(TFpeakall_era{1},3)-1;
 overlap = 0.9;
@@ -68,8 +59,8 @@ for subj=1:16;
 [allnfaht{subj}] = rsa_peaks(TFpeakall_nfa{subj},TFpeakall_nfh{subj},tsamps,fsh);
 end
 
-%%
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
+%% To plot Fig.5 
+cd ~/data2github
 load data_aheestime.mat
 %% plot one subject example as in Fig. 5
 figure 
@@ -108,12 +99,14 @@ delay_p7pk13=35*1.5/150
 hctime_p7pk13= pktimeamy_p7pk13+delay_p7pk13
 
 %%
+load ('TFexample.mat')
+
 figure
 subplot(1,2,1)
 clims=[-2 2]
 x = [-0.05 0.05];
 y = [90 150];
-datapattern=TF_erh(11).values.powspctrm(3,:,23:47,228:238)%233
+datapattern=TF_erh(1).values.powspctrm(3,:,23:47,228:238);
 datapattern=squeeze(datapattern)
 imagesc(x,y,datapattern,clims)
 set(gca,'YDir','normal')
@@ -124,7 +117,7 @@ subplot(1,2,2)
 clims=[-1.5 1.5]
 x = [-0.05 0.05];
 y = [90 150];
-datapattern_rec=TF_ehith(11).values.powspctrm(3,:,23:47,226:236)%233
+datapattern_rec=TF_ehith(1).values.powspctrm(3,:,23:47,226:236)
 datapattern_rec=squeeze(datapattern_rec)
 imagesc(x,y,datapattern_rec,clims)
 set(gca,'YDir','normal')
@@ -133,6 +126,11 @@ ylabel ('frequency (Hz)')
 % colorbar
 
 %%
+Hclist=[1 2 1 2 2 1 1 1 1 1 1 1 1 2 2 1];
+cd ~/data2github
+load TF_data_16sj.mat
+load('data_16sj.mat')
+
 win = 5;
 freq=[23:47];
 t=[0 1.5];
@@ -287,7 +285,7 @@ begs = (1:nshift:(endsample-nsmp))';
 ends = begs+nsmp;
 tsamps= [begs ends]
 
-fsh=[1:25]%this is 90-150 hz;%
+fsh=[1:25]
 %%
 parfor subj=1:16;
 [allerahh{subj}] = rsa_peaks(TFpeak_erhh{subj},TFpeak_ehithh{subj},tsamps,fsh);
@@ -296,10 +294,30 @@ parfor subj=1:16;
 [allnfahh{subj}] = rsa_peaks(TFpeak_nfhh{subj},TFpeak_nmisshh{subj},tsamps,fsh);
 end
 
-%%
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
+%% To reproduce Fig.5
+clear all
+close all
+clc
+
+cd ~/data2github
+load Gatemp.mat
 load data_ahh_ers.mat
+load 'TFtemp.mat'
+
+addpath('~/utils/reinstatement-analysis-master/additional_functions')
+addpath('~/utils/functions')
+addpath('~/utils/beeswarm-master')
+addpath('~/utils')
 %%
+subjects_renamed = [60 13 15 16 160 25 32 11 33 6 600 10 2000 36 38 8];
+method = 'oneel'
+
+subjects_ers = [60 13 15 160 25 32 33 600 2000 36 38 8];
+subjects_ersme = [60 13 15 160 25 32 11 33 600 10 2000 36 38 8]; %11 cannot be included in the int for nr
+pos = find(ismember(subjects_renamed,subjects_ers))
+posme = find(ismember(subjects_renamed,subjects_ersme))
+%%
+
 for subj=1:16
 [i,j,v]=find(maxalleR{subj} < 0)
 allerahh_pos{subj}=allerahh{subj};
@@ -328,18 +346,14 @@ allnfahh_pos{subj}(v,:)=[];
 end
 %%
 
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
-load Gatemp.mat
-
-%%
 GAs.time = []
-GAs.time = TF_erh(1).values.time(151:221)% 80% overalp; 100 ms
+GAs.time = TF_erh(1).values.time(151:221);
 
 GAs.stderr = []
-GAs.stderr = TF_erh(1).values.time(151:221)
+GAs.stderr = TF_erh(1).values.time(151:221);
 
 GAs.individual = []
-%%
+
 Ga_erahh = GAs
 Ga_nrahh = GAs
 Ga_efahh = GAs
@@ -383,7 +397,7 @@ cfg.design = [ones(1,ns) ones(1,ns).*2;[1:ns] [1:ns]];
 int = ft_timelockstatistics(cfg,URUFahh, NRNFahh)
 
 %%
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
+cd ~/data2github
 load stat_ahhERS.mat
 
 ns=size(Ga_erahh.individual,1);

@@ -1,31 +1,29 @@
 clear all
 close all
 clc
-addpath('/Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/01_Paper/Githubcodes/Function')
 
 %%
 restoredefaultpath
-addpath '/Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox/fieldtrip-20210212/'
+addpath '~/fieldtrip-20210212/'
 ft_defaults
 
-oripath = '/Volumes/ManuelaCTB/manuela/Desktop/AversiveMemRetrieval'; 
-addpath(fullfile(oripath,'utils'))
-addpath(fullfile(oripath,'utils','beeswarm-master'))
-addpath('/Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Function')
+addpath('~/utils/reinstatement-analysis-master/additional_functions')
+addpath('~/utils/functions')
+addpath('~/utils/beeswarm-master')
+addpath('~/utils')
 
 %%
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
+cd ~/data2github
 load TF_data_16sj.mat
 load('data_16sj.mat')
-%%
+
 subjects = [60 13 15 16 160 25 32 10 33 6 600 10 2 36 38 8];
-%[4:8,10,11,13,14] A1; [1:3,9,12,15,16] A2
-% [1,3,6:13,16] h1;[2,4,5,14:15] h2
+%%
 Amylist=[2 2 2 1 1 1 1 1 2 1 1 2 1 1 2 2];
 Hclist=[1 2 1 2 2 1 1 1 1 1 1 1 1 2 2 1];
 freq = [23:47]
 toi=[0 1.5]
-%%
+%% find amygdala peaks during encoding and prepare the data
 parfor s=1:16;
 [TFpeakall_era{s}, TFpeakall_erh{s}, TFpeakall_ehith{s}, nb_er{s}] = findamypeaksEESERS(eR_amy{s},TF_era(s),Amylist(s), TF_erh(s),TF_ehith(s),Hclist(s),50,freq,toi);
 [TFpeakall_nra{s}, TFpeakall_nrh{s}, TFpeakall_nhith{s}, nb_nr{s}] = findamypeaksEESERS(nR_amy{s},TF_nra(s),Amylist(s), TF_nrh(s),TF_nhith(s),Hclist(s),50,freq,toi);
@@ -33,23 +31,18 @@ parfor s=1:16;
 [TFpeakall_nfa{s}, TFpeakall_nfh{s}, TFpeakall_nmissh{s}, nb_nf{s}] = findamypeaksEESERS(nKF_amy{s},TF_nfa(s),Amylist(s), TF_nfh(s),TF_nmissh(s),Hclist(s),50,freq,toi);
 end
 %%
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/0_AmyHippo/Granger_causality_Carina/Data
-load GAs_structure
-        subjects = [60 13 15 16 160 25 32 10 33 6 600 10 2 36 38 8];
+load Gatemp.mat
+
 subjects_renamed = [60 13 15 16 160 25 32 11 33 6 600 10 2000 36 38 8];
 method = 'oneel'
-if strcmp(method,'allel')
-pos=find(ismember(subjects_renamed,subjects_ers))
-else
-subjects_ers1 = [60 13 15 160 25 32 33 600 2000 36 38 8];
-subjects_ers1me = [60 13 15 160 25 32 11 33 600 10 2000 36 38 8]; %11 cannot be included in the int for nr
-pos = find(ismember(subjects_renamed,subjects_ers1))
-posme = find(ismember(subjects_renamed,subjects_ers1me))
-end
+subjects_ers = [60 13 15 160 25 32 33 600 2000 36 38 8];
+subjects_ersme = [60 13 15 160 25 32 11 33 600 10 2000 36 38 8]; 
+pos = find(ismember(subjects_renamed,subjects_ers))
+posme = find(ismember(subjects_renamed,subjects_ersme))
 
 %%
 GAs.time = []
-GAs.time = TF_erh(1).values.time(151:221)% 80% overalp; 100 ms
+GAs.time = TF_erh(1).values.time(151:221)
 GAs.stderr = []
 GAs.stderr = TF_erh(1).values.time(151:221)
 GAs.individual = []
@@ -81,7 +74,7 @@ TF_nmisshsel = TF_nmissh(1,pos);
 
 Amylistsel= Amylist(1,pos);
 Hclistsel= Hclist(1,pos);
-%% random no peak selection
+%% compute the rsa using random no peak selection
 tic
 nsmp    = size(TFpeakall_era{1},3)-1;
 overlap = 0.8;
@@ -159,7 +152,7 @@ figure
 histogram(positive_cluster_value)
 xlabel 'p-values'
 ylabel 'Number of observations'
-%% ERS
+%% Do the same for the ERS
 nsmp    = size(TFpeakall_era{1},3)-1;
 overlap = 0.8;
 nshift  = round((1-overlap)*nsmp);
@@ -234,12 +227,18 @@ elseif isfield(intrndnop_ers{rnd}, 'posclusters')
 positive_cluster_value_ers(rnd) = intrndnop_ers{rnd}.posclusters.prob
 end
 end
-%% to plot suppl fig 4 starts from here
+%% to plot Supplementary Fig. 4 starts from here
 clear all
 close all
 clc
 
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
+addpath('~/utils/reinstatement-analysis-master/additional_functions')
+addpath('~/utils/functions')
+addpath('~/utils/beeswarm-master')
+addpath('~/utils')
+
+%%
+cd ~/data2github
 load 'statees_rndnopeaks1000.mat'
 load 'stat_rndnopeaks_ers1000.mat'
 
@@ -265,6 +264,7 @@ subplot(1,2,1)
 edges = linspace(0, 0.15, 41);
 histogram(positive_cluster_value,'BinEdges',edges, 'FaceColor',[0 0 0])
 xlim([0, 0.15]);
+ylim([0 180]);
 xlabel 'p-values'
 ylabel 'Number of observations'
 hold all
@@ -273,6 +273,8 @@ line([0.025,0.025], ylim, 'LineWidth', 2, 'Color', 'r');
 hold on
 subplot(1,2,2)
 histogram(positive_cluster_value_ers,'BinEdges',edges,'FaceColor',[0 0 0])
+xlim([0, 0.15]);
+ylim([0 250]);
 xlabel 'p-values'
 ylabel 'Number of observations'
 hold all

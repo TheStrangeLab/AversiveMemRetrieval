@@ -4,22 +4,20 @@ close all
 clc
 
 restoredefaultpath
-addpath '/Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox/fieldtrip-20210212/'
+addpath '~/fieldtrip-20210212/'
 ft_defaults
 
-cd ~/ERS/Hippocampus
-
+cd ~/data2github
 load 'datapowconds_encrec_hcN16_clean.mat'
 load 'data_TFconds_encrec_hcN16_clean.mat'
-%%
-addpath('~/Function/reinstatement-analysis-master/additional_functions')
+addpath('~/utils/reinstatement-analysis-master/additional_functions')
 %%
 subjects = [60 13 15 16 160 25 32 10 33 6 600 10 2 36 38 8];
-ts=[100:301]; %this is time until 1.5, 
+ts=[100:301]; %this is time until 1.5
 fsh=[35:81]
 fsl=[1:34]
 win=50
-%%
+%% compute rsa for each condition
 for s=[1:16]
 all2aller = []
 all2aller(:,1,1,:,:) = pow_er{s}(:,fsh,ts);
@@ -77,25 +75,6 @@ end
 
 close all
 
-%% Do GA conds
-
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/Results
-load 'Gatemp.mat'
-
-subjects = [60 13 15 16 160 25 32 10 33 6 600 10 2 36 38 8];
-subjects_renamed = [60 13 15 16 160 25 32 11 33 6 600 10 2000 36 38 8];
-subjects_cond = [60 13 15 16 160 25 32 6 600 10 2 36 38 8];
-%%
-subjects_ers = [60 13 15 16 160 25 32 11 33 61 600 10 2000 36 38 8];
-method = 'oneel'
-if strcmp(method,'allel')
-pos=find(ismember(subjects_renamed,subjects_ers))
-else
-subjects_ers1 = [60 13 15 160 25 32 33 600 2000 36 38 8]; 
-subjects_ers1me = [60 13 15 160 25 32 11 33 600 10 2000 36 38 8]; %11 cannot be included in the int for nr
-pos = find(ismember(subjects_renamed,subjects_ers1))
-posme = find(ismember(subjects_renamed,subjects_ers1me))
-end
 %%
 GTFs_Multitaper_baseline_Unpl.time = []
 GTFs_Multitaper_baseline_Unpl.time = TFs_ehit_baseline_avg(1).values.time(1,[1:size(d2per{1},2)])
@@ -151,37 +130,32 @@ cfg.design = [ones(1,ns) ones(1,ns).*2;[1:ns] [1:ns]];
 
 statERSint = ft_freqstatistics(cfg, URUKF, NRNKF);
 
-%% to plot figure 3 
+%% to plot Fig. 3b 
 
 clear all
 close all
 clc
 
 restoredefaultpath
-addpath '/Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox/fieldtrip-20210212/'
+addpath '~/fieldtrip-20210212/'
 ft_defaults
 
-cd /Volumes/ManuelaCTB/manuela/Desktop/CTB/00000_IAPS_ERS/001Submission/22December2023/Githubcodes/Data
+cd ~/data2github
 load Ga_data_ERShippo_ztransf.mat
 load 'statershippo.mat'
 load 'Gatemp.mat'
 
-subjects = [60 13 15 16 160 25 32 10 33 6 600 10 2 36 38 8];
 subjects_renamed = [60 13 15 16 160 25 32 11 33 6 600 10 2000 36 38 8];
-subjects_cond = [60 13 15 16 160 25 32 6 600 10 2 36 38 8];
-%%
-subjects_ers = [60 13 15 16 160 25 32 11 33 61 600 10 2000 36 38 8];
 method = 'oneel'
-if strcmp(method,'allel')
-pos=find(ismember(subjects_renamed,subjects_ers))
-else
-subjects_ers1 = [60 13 15 160 25 32 33 600 2000 36 38 8]; 
-subjects_ers1me = [60 13 15 160 25 32 11 33 600 10 2000 36 38 8]; %11 cannot be included in the int for nr
-pos = find(ismember(subjects_renamed,subjects_ers1))
-posme = find(ismember(subjects_renamed,subjects_ers1me))
+
+if strcmp(method,'oneel')
+subjects_ers = [60 13 15 160 25 32 33 600 2000 36 38 8]; 
+subjects_ersme = [60 13 15 160 25 32 11 33 600 10 2000 36 38 8]; 
+pos = find(ismember(subjects_renamed,subjects_ers))
+posme = find(ismember(subjects_renamed,subjects_ersme))
 end
 
-%% calculate diff
+%% compute the difference between conditions
 
 URUKF = Ga_er;
 URUKF.powspctrm = Ga_er.powspctrm - Ga_ekf.powspctrm
@@ -202,7 +176,7 @@ time = [-0.5103:0.1257:1.5009]
 intdata.time=[]
 intdata.time=time(1,[2:end])
 intdata.freq=time(1,[2:end])
-%%
+%% define cluster and mean RSA values within the significant cluster
 statERSint= statERSint
 statERSint.mask = statERSint.negclusterslabelmat ==1
 maskt= sum(squeeze(statERSint.mask),1);
@@ -226,7 +200,7 @@ mat(:,2) = squeeze(mean(mean(Ga_ekf.powspctrm(:,:,pf1:pf2,pt1:pt2),4),3));
 mat(:,3) = squeeze(mean(mean(Ga_nr.powspctrm(:,:,pf1:pf2,pt1:pt2),4),3));
 mat(:,4) = squeeze(mean(mean(Ga_nkf.powspctrm(:,:,pf1:pf2,pt1:pt2),4),3));
 
-%%
+%% Plot Fig.3b
 cfg = [];
 cfg.figure='gcf';
 cfg.zlim = [-0.05 0.05]
@@ -313,8 +287,6 @@ hold on
 axis square
 
 subplot(2,3,3);
-%cfg.xlim = [0 1.5]
-%cfg.ylim = [0 1.5]
 cfg.xlim = [-0.5 1.5]
 cfg.ylim = [-0.5 1.5]
 ft_singleplotTFR(cfg,intdata);
@@ -330,8 +302,8 @@ axis square
 
 
 subplot(2,3,6)
-addpath /Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox_plot/beeswarm-master
-addpath /Volumes/ManuelaCTB/manuela/Desktop/CTB/000_Toolbox_plot/stdshade.m
+addpath ~/utils/beeswarm-master
+addpath ~/utils/stdshade.m
 
 ns=size(Ga_er.powspctrm,1)
 x = [ones(ns,1) ones(ns,1)*2 ones(ns,1)*3 ones(ns,1)*4];
