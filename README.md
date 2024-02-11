@@ -4,7 +4,7 @@ This folder contains the code used to analyze the data included in the paper
 
 run01_TimeFreqAmygdalaStat reproduces the time frequency results and statistics for patients with electrodes implanted in the amygdala. It also produces Fig. 1d and Supplementary Fig.2.
 
-run01_TimeFreqHippocampusStat reproduces the time frequency results and statistics for patients with electrodes implanted in the amygdala. It also produces Fig. 1c and Supplementary Fig.1.
+run01_TimeFreqHippocampusStat reproduces the time frequency results and statistics for patients with electrodes implanted in the hippocampus. It also produces Fig. 1c and Supplementary Fig.1.
 
 run02_GrangerCausalityStat reproduces the time frequency Granger results in the direction amygdala to hippocampus and hippocampus to amygdala as in Fig.2
 
